@@ -1,0 +1,156 @@
+import pyttsx3
+engine = pyttsx3.init()
+engine.setProperty('rate', 200)
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)
+
+
+import smtplib
+import webbrowser
+import datetime
+import time
+import speech_recognition as sr
+import wikipedia
+
+
+for index, name in enumerate(sr.Microphone.list_microphone_names()):
+    print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+    
+def takecommand():
+    #takes microphone input recognize speech to text
+    r=sr.Recognizer()
+    with sr.Microphone() as source:
+        print('listening......')
+        r.pause_threshold=1
+        r.operation_timeout=7
+        r.energy_threshold =10000
+        audio=r.listen(source,timeout=7)
+        
+        try:
+            print('recognizing.....')
+            query= r.recognize_google(audio, language="en-in")
+            print("user said:",query)
+            
+        except:
+            print('sorry, could not understand,please try again')
+            speak('sorry, could not understand,please try again')
+           
+            return takecommand()
+    return query
+
+def wishme():
+    hour=(datetime.datetime.now().hour)
+    if hour>=0 and hour<=12:
+        speak('good morning sir')
+    elif hour>12 and hour<18:
+        speak('good afternoon sir')
+    else:
+        speak('good evening  sir')
+    speak("I am javrish from iron man. It's good to see you back.  How may I help you?")
+
+
+
+def send_email(to,content):
+    server=smtplib.SMTP("smtp.gmail.com", 587)
+    server.ehlo()
+    server.starttls()
+    server.login("pratyushkumarkarna", "Karna@1998")
+    server.sendmail("pratyushkumarkarna", to,content)
+    server.close()
+
+
+def javris():
+    wishme()
+    while True:
+        query=takecommand().lower()
+        if 'wikipedia' in query:
+            speak('searching wikipedia...... please wait....')
+            query=query.replace("wikipedia", " ")
+            wiki_result=wikipedia.summary(query,sentences=3)
+            print("according to wikipedia",wiki_result)
+            speak("according to wikipedia")
+            speak(wiki_result)
+            
+        elif "open youtube" in query:
+            webbrowser.open("youtube.com")
+           
+        elif "open gmail" in query:
+            webbrowser.open("gmail.com")
+        
+        elif "open hotstar" in query:
+            webbrowser.open("hotstar.com")
+        
+        elif "open swiggy" in query:
+            webbrowser.open("swiggy.com")
+        elif "search " in query and " on laptop" in query:
+            lappy_search=[]
+            folder=""
+            query=query.replace("search ", "")
+            query=query.replace(" on", "")
+            query=query.replace(" laptop", "")
+            
+            for i in range(12):
+                folder=search_box[i]
+                details=os.listdir(folder)
+                for j in range(len(details)):
+                    if query in details[j]:
+                        lappy_search.append(details[j] + "=" + search_box[i])
+                    if query.capitalize() in details[j]:
+                        lappy_search.append(details[j] +  "=" + search_box[i])
+                    if query.upper() in details[j]:
+                        lappy_search.append(details[j] +  "=" + search_box[i])
+            for k in range(len(lappy_search)):
+                print(k+1,":", lappy_search[k])
+            number=int(takecommand())
+            a,b=lappy_search[number-1].split("=")
+            os.startfile(os.path.join(b,a))
+            
+        elif "the time" in query:
+            str_time= datetime.datetime.now().strftime("%H:%M:%S")
+            speak("sir, the time is", str_time)
+        elif "Open Excel" in query:
+            excel="C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Excel 2016"
+            os.startfile(excel)
+        elif "chrome" in query:
+            chrome="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+            os.startfile(chrome)
+        elif "MS Word" in query:
+            word="C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Word 2016"
+            os.startfile(word)
+        
+        elif "email" in query:
+            speak("to who ,sir?")
+            to=input("enter the mail id: ")
+            speak("please tell the message")
+            message=takecommand()
+            send_email(to,message)
+            speak("message send sir")
+        elif "search youtube" in query:
+            speak("what do you want to search , sir?")
+            youtube_search=takecommand()
+            youtube_search=youtube_search.replace(" ", "+")
+            webbrowser.open("https://www.youtube.com/results?search_query="+ youtube_search)
+            
+        elif "search google" in query:
+            speak("what do you want me search sir?")
+            google_search=takecommand()
+            google_search=google_search.replace(" ","+")
+            webbrowser.open("https://www.google.com/search?q=" + google_search)
+        
+        elif "pause" in query or "wait" in query:
+            speak("ok, sir")
+            w=0
+            while w<90:
+                w=w+1
+                time.sleep(1)
+            speak("sir, the pause time is over. Do you want me to wait more or do something?")
+        elif "quit" in query:
+            speak("ok sir. it's a pleasure for  being a help for you")
+            return "none"
+        
+javris()
+         
